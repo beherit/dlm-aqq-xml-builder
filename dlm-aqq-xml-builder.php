@@ -6,7 +6,7 @@ Description: Wspomaga budowanie pliku XML na potrzeby systemu aktualizacji w kom
 Version: 1.0
 Author: Krzysztof Grochocki
 Author URI: http://beherit.pl/
-License: GPL3
+License: GPLv3
 */
 
 /*

@@ -42,7 +42,7 @@ add_action('admin_init', 'dlm_axb_admin_init');
 
 //Link to the settings on plugins page
 function dlm_axb_plugin_action_links($action_links, $plugin_file) {
-	if(plugin_basename(__FILE__) == $plugin_file) {
+	if(plugin_basename(__FILE__)  ==  $plugin_file) {
 		$action_links[] = '<a href="edit.php?post_type=dlm_download&page=dlm_axb_settings">Ustawienia</a>';
 	}
     return $action_links;
@@ -54,7 +54,90 @@ function dlm_axb_admin_menu() {
 }
 add_action('admin_menu', 'dlm_axb_admin_menu');
 
-//Settings page
+//Add metaboxes
+function dlm_axb_adding_meta_boxes() {
+	//Get category slug from terms
+	$terms = get_the_terms($post->ID, 'dlm_download_category');
+	if($terms && ! is_wp_error($terms)) {
+		$term_slugs_arr = array();
+		foreach ($terms as $term) {
+			$term_slugs_arr[] = $term->slug;
+		}
+		$terms_slug_str = join(" ", $term_slugs_arr);
+	}
+	//Add meta boxes for custom post type and category
+	if((!empty($terms_slug_str)) && (($terms_slug_str == get_option('dlm_axb_plugins_category')) || ($terms_slug_str == get_option('dlm_axb_themes_category')))) {
+		add_meta_box(
+			'dlm_axb_meta_boxes',
+			'Informacje o pliku',
+			'dlm_axb_meta_boxes',
+			'dlm_download',
+			'normal',
+			'default'
+		);
+	}
+}
+add_action('add_meta_boxes', 'dlm_axb_adding_meta_boxes');
+
+//Show meta boxes
+function dlm_axb_meta_boxes() {
+	//Get category slug from terms
+	$terms = get_the_terms($post->ID, 'dlm_download_category');
+	if($terms && ! is_wp_error($terms)) {
+		$term_slugs_arr = array();
+		foreach ($terms as $term) {
+			$term_slugs_arr[] = $term->slug;
+		}
+		$terms_slug_str = join(" ", $term_slugs_arr);
+	}
+	//Get set categories
+	$themes_category = get_option('dlm_axb_themes_category');
+	//Get saved meta data
+	$values = get_post_custom($post->ID);
+	$changelog = isset($values['dlm_download_changelog']) ? $values['dlm_download_changelog'][0] : '';
+	$version_type = isset($values['dlm_download_version_type']) ? $values['dlm_download_version_type'][0] : 0;
+	if($terms_slug_str != $themes_category) {
+		$platform = isset($values['dlm_download_platform']) ? $values['dlm_download_platform'][0] : 2;
+		$dll_name = isset($values['dlm_download_dll_name']) ? $values['dlm_download_dll_name'][0] : get_the_title();
+	}
+	$supported_core = isset($values['dlm_download_supported_core']) ? $values['dlm_download_supported_core'][0] : '';
+
+	//Set nonce field for saving meta data
+	wp_nonce_field('dlm_axb_meta_boxes_nonce', 'axb_meta_boxes_nonce');
+	//Print meta boxes ?>
+	<p>
+		<label for="dlm_download_changelog">Lista zmian:</label>
+		<textarea name="dlm_download_changelog" id="dlm_download_changelog" style="width:100%; min-height:200px;"><?php echo $changelog; ?></textarea>
+	</p>
+	<p>
+		<label for="dlm_download_version_type">Typ wersji:</label>
+        <select name="dlm_download_version_type" id="dlm_download_version_type">
+            <option value="0" <?php selected($version_type, 0); ?>>stablina</option>
+            <option value="1" <?php selected($version_type, 1); ?>>rozwojowa</option>
+        </select>
+	</p>
+	<?php if($terms_slug_str != $themes_category) { ?>
+	<p>
+		<label for="dlm_download_platform">Platforma:</label>
+        <select name="dlm_download_platform" id="dlm_download_platform">
+            <option value="0" <?php selected($platform, 0); ?>>x86</option>
+            <option value="1" <?php selected($platform, 1); ?>>x64</option>
+            <option value="2" <?php selected($platform, 2); ?>>x86/x64</option>
+        </select>
+	</p>
+	<p>
+        <label for="dlm_download_dll_name">Id dodatku:</label>
+        <input type="text" name="dlm_download_dll_name" id="dlm_download_dll_name" value="<?php echo $dll_name; ?>" />
+    </p>
+	<?php } ?>
+	<p>
+        <label for="dlm_download_supported_core">Wymagana wersja AQQ:</label>
+        <input type="text" name="dlm_download_supported_core" id="dlm_download_supported_core" value="<?php echo $supported_core; ?>" />
+    </p>
+	<?php
+}
+
+//Display settings page
 function dlm_axb_settings_page() { ?>
 	<div class="wrap">
 		<h2>AQQ XML Builder Add-on</h2>
@@ -145,31 +228,6 @@ function dlm_axb_settings_page() { ?>
 	<?php
 }
 
-//Adding meta boxes
-function dlm_axb_adding_meta_boxes() {
-	//Get category slug from terms
-	$terms = get_the_terms($post->ID, 'dlm_download_category');
-	if($terms && ! is_wp_error($terms)) {
-		$term_slugs_arr = array();
-		foreach ($terms as $term) {
-			$term_slugs_arr[] = $term->slug;
-		}
-		$terms_slug_str = join(" ", $term_slugs_arr);
-	}
-	//Set meta boxes for custom post type and category
-	if((!empty($terms_slug_str)) && (($terms_slug_str==get_option('dlm_axb_plugins_category')) || ($terms_slug_str==get_option('dlm_axb_themes_category')))) {
-		add_meta_box(
-			'dlm_axb_meta_boxes',
-			'Informacje o pliku',
-			'dlm_axb_show_meta_boxes',
-			'dlm_download',
-			'normal',
-			'default'
-		);
-	}
-}
-add_action('add_meta_boxes', 'dlm_axb_adding_meta_boxes');
-
 //Saving data on post update and rebuild XML
 function dlm_axb_save_post($post_id) {
 	//End on doing an auto save
@@ -177,7 +235,7 @@ function dlm_axb_save_post($post_id) {
 	//Our nonce isn't there or we can't verify it
 	if(!isset($_POST['axb_meta_boxes_nonce']) || !wp_verify_nonce($_POST['axb_meta_boxes_nonce'], 'dlm_axb_meta_boxes_nonce')) {
 		//Rebuild XML files on custom post type
-		if(get_post_type($post_id)=='dlm_download') {
+		if(get_post_type($post_id) == 'dlm_download') {
 			//Get category slug from terms
 			$terms = get_the_terms($post_id, 'dlm_download_category');
 			if($terms && ! is_wp_error($terms)) {
@@ -188,7 +246,7 @@ function dlm_axb_save_post($post_id) {
 				$terms_slug_str = join(" ", $term_slugs_arr);
 			}
 			//Rebuild XML files only on custom category
-			if((!empty($terms_slug_str)) && (($terms_slug_str==get_option('dlm_axb_plugins_category')) || ($terms_slug_str==get_option('dlm_axb_themes_category')))) {
+			if((!empty($terms_slug_str)) && (($terms_slug_str == get_option('dlm_axb_plugins_category')) || ($terms_slug_str == get_option('dlm_axb_themes_category')))) {
 				dlm_axb_generate_plugins_xml();
 				dlm_axb_generate_themes_xml();
 			}
@@ -212,64 +270,6 @@ function dlm_axb_save_post($post_id) {
 	dlm_axb_generate_themes_xml();
 }
 add_action('save_post', 'dlm_axb_save_post');
-
-//Show meta boxes
-function dlm_axb_show_meta_boxes() {
-	//Get category slug from terms
-	$terms = get_the_terms($post->ID, 'dlm_download_category');
-	if($terms && ! is_wp_error($terms)) {
-		$term_slugs_arr = array();
-		foreach ($terms as $term) {
-			$term_slugs_arr[] = $term->slug;
-		}
-		$terms_slug_str = join(" ", $term_slugs_arr);
-	}
-	//Get set categories
-	$themes_category = get_option('dlm_axb_themes_category');
-	//Get saved meta data
-	$values = get_post_custom($post->ID);
-	$changelog = isset($values['dlm_download_changelog']) ? $values['dlm_download_changelog'][0] : '';
-	$version_type = isset($values['dlm_download_version_type']) ? $values['dlm_download_version_type'][0] : 0;
-	if($terms_slug_str!=$themes_category) {
-		$platform = isset($values['dlm_download_platform']) ? $values['dlm_download_platform'][0] : 2;
-		$dll_name = isset($values['dlm_download_dll_name']) ? $values['dlm_download_dll_name'][0] : get_the_title();
-	}
-	$supported_core = isset($values['dlm_download_supported_core']) ? $values['dlm_download_supported_core'][0] : '';
-
-	//Set nonce field for saving meta data
-	wp_nonce_field('dlm_axb_meta_boxes_nonce', 'axb_meta_boxes_nonce');
-	//Print meta boxes ?>
-	<p>
-		<label for="dlm_download_changelog">Lista zmian:</label>
-		<textarea name="dlm_download_changelog" id="dlm_download_changelog" style="width:100%; min-height:200px;"><?php echo $changelog; ?></textarea>
-	</p>
-	<p>
-		<label for="dlm_download_version_type">Typ wersji:</label>
-        <select name="dlm_download_version_type" id="dlm_download_version_type">
-            <option value="0" <?php selected($version_type, 0); ?>>stablina</option>
-            <option value="1" <?php selected($version_type, 1); ?>>rozwojowa</option>
-        </select>
-	</p>
-	<?php if($terms_slug_str!=$themes_category) { ?>
-	<p>
-		<label for="dlm_download_platform">Platforma:</label>
-        <select name="dlm_download_platform" id="dlm_download_platform">
-            <option value="0" <?php selected($platform, 0); ?>>x86</option>
-            <option value="1" <?php selected($platform, 1); ?>>x64</option>
-            <option value="2" <?php selected($platform, 2); ?>>x86/x64</option>
-        </select>
-	</p>
-	<p>
-        <label for="dlm_download_dll_name">Id dodatku:</label>
-        <input type="text" name="dlm_download_dll_name" id="dlm_download_dll_name" value="<?php echo $dll_name; ?>" />
-    </p>
-	<?php } ?>
-	<p>
-        <label for="dlm_download_supported_core">Wymagana wersja AQQ:</label>
-        <input type="text" name="dlm_download_supported_core" id="dlm_download_supported_core" value="<?php echo $supported_core; ?>" />
-    </p>
-	<?php
-}
 
 //XML class
 class SimpleXMLExtended extends SimpleXMLElement {
@@ -318,7 +318,7 @@ function dlm_axb_generate_plugins_xml() {
 			$item->addChild('name', get_the_title());
 			$item->addChild('version', $dlm_download->get_the_version_number());
 			$version_type = get_post_meta($query->post->ID, 'dlm_download_version_type', true);
-			if($version_type==1) $version_type = 'beta';
+			if($version_type == 1) $version_type = 'beta';
 			else $version_type = 'stable';
 			$item->addChild('version-type', $version_type);
 			$item->addChild('supported-core', get_post_meta($query->post->ID, 'dlm_download_supported_core', true));
@@ -328,9 +328,9 @@ function dlm_axb_generate_plugins_xml() {
 			$platforms = $item->addChild('platforms');
 			$platform = get_post_meta($query->post->ID, 'dlm_download_platform', true);
 			if(empty($platform)) $platform = 2;
-			if($platform==0) $platforms->addChild('x86');
-			if($platform==1) $platforms->addChild('x64');
-			if($platform==2) {
+			if($platform == 0) $platforms->addChild('x86');
+			if($platform == 1) $platforms->addChild('x64');
+			if($platform == 2) {
 				$platforms->addChild('x86');
 				$platforms->addChild('x64');
 			}
@@ -390,7 +390,7 @@ function dlm_axb_generate_themes_xml() {
 			$item->addChild('name', get_the_title());
 			$item->addChild('version', $dlm_download->get_the_version_number());
 			$version_type = get_post_meta($query->post->ID, 'dlm_download_version_type', true);
-			if($version_type==1) $version_type = 'beta';
+			if($version_type == 1) $version_type = 'beta';
 			else $version_type = 'stable';
 			$item->addChild('version-type', $version_type);
 			$item->addChild('supported-core', get_post_meta($query->post->ID, 'dlm_download_supported_core', true));

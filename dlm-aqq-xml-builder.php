@@ -302,8 +302,8 @@ function dlm_axb_generate_plugins_xml() {
 				'operator' => 'IN'
 			)
 		),
-    	'orderby' 	      => 'date',
-    	'order'           => 'DESC'
+    	'orderby' => 'date',
+    	'order' => 'DESC'
     );
 	$query = new WP_Query($args);
 	//Start query
@@ -374,8 +374,8 @@ function dlm_axb_generate_themes_xml() {
 				'operator' => 'IN'
 			)
 		),
-    	'orderby' 	      => 'date',
-    	'order'           => 'DESC'
+    	'orderby' => 'date',
+    	'order' => 'DESC'
     );
 	$query = new WP_Query($args);
 	//Start query

@@ -59,18 +59,16 @@ function dlm_axb_adding_meta_boxes() {
 	//Get category slug from terms
 	$terms = get_the_terms($post->ID, 'dlm_download_category');
 	if($terms && ! is_wp_error($terms)) {
-		$term_slugs_arr = array();
 		foreach ($terms as $term) {
 			$term_slugs_arr[] = $term->slug;
 		}
-		$terms_slug_str = join(" ", $term_slugs_arr);
 	}
-	//Add meta boxes for custom post type and category
-	if((!empty($terms_slug_str)) && (($terms_slug_str == get_option('dlm_axb_plugins_category')) || ($terms_slug_str == get_option('dlm_axb_themes_category')))) {
+	//Add post metaboxe for custom post type and category
+	if((in_array(get_option('dlm_axb_plugins_category'), $term_slugs_arr)) || (in_array(get_option('dlm_axb_themes_category'), $term_slugs_arr))) {
 		add_meta_box(
-			'dlm_axb_meta_boxes',
+			'dlm_axb_post_meta_box',
 			'Informacje o pliku',
-			'dlm_axb_meta_boxes',
+			'dlm_axb_post_meta_box',
 			'dlm_download',
 			'normal',
 			'default'
@@ -80,15 +78,13 @@ function dlm_axb_adding_meta_boxes() {
 add_action('add_meta_boxes', 'dlm_axb_adding_meta_boxes');
 
 //Show meta boxes
-function dlm_axb_meta_boxes() {
+function dlm_axb_post_meta_box() {
 	//Get category slug from terms
 	$terms = get_the_terms($post->ID, 'dlm_download_category');
 	if($terms && ! is_wp_error($terms)) {
-		$term_slugs_arr = array();
 		foreach ($terms as $term) {
 			$term_slugs_arr[] = $term->slug;
 		}
-		$terms_slug_str = join(" ", $term_slugs_arr);
 	}
 	//Get set categories
 	$themes_category = get_option('dlm_axb_themes_category');
@@ -96,7 +92,7 @@ function dlm_axb_meta_boxes() {
 	$values = get_post_custom($post->ID);
 	$changelog = isset($values['dlm_download_changelog']) ? $values['dlm_download_changelog'][0] : '';
 	$version_type = isset($values['dlm_download_version_type']) ? $values['dlm_download_version_type'][0] : 0;
-	if($terms_slug_str != $themes_category) {
+	if(!in_array($themes_category, $term_slugs_arr)) {
 		$platform = isset($values['dlm_download_platform']) ? $values['dlm_download_platform'][0] : 2;
 		$dll_name = isset($values['dlm_download_dll_name']) ? $values['dlm_download_dll_name'][0] : get_the_title();
 	}
@@ -116,7 +112,7 @@ function dlm_axb_meta_boxes() {
             <option value="1" <?php selected($version_type, 1); ?>>rozwojowa</option>
         </select>
 	</p>
-	<?php if($terms_slug_str != $themes_category) { ?>
+	<?php if(!in_array($themes_category, $term_slugs_arr)) { ?>
 	<p>
 		<label for="dlm_download_platform">Platforma:</label>
         <select name="dlm_download_platform" id="dlm_download_platform">
@@ -239,14 +235,12 @@ function dlm_axb_save_post($post_id) {
 			//Get category slug from terms
 			$terms = get_the_terms($post_id, 'dlm_download_category');
 			if($terms && ! is_wp_error($terms)) {
-				$term_slugs_arr = array();
 				foreach ($terms as $term) {
 					$term_slugs_arr[] = $term->slug;
 				}
-				$terms_slug_str = join(" ", $term_slugs_arr);
 			}
-			//Rebuild XML files only on custom category
-			if((!empty($terms_slug_str)) && (($terms_slug_str == get_option('dlm_axb_plugins_category')) || ($terms_slug_str == get_option('dlm_axb_themes_category')))) {
+			//Add post metaboxe for custom post type and category
+			if((in_array(get_option('dlm_axb_plugins_category'), $term_slugs_arr)) || (in_array(get_option('dlm_axb_themes_category'), $term_slugs_arr))) {
 				dlm_axb_generate_plugins_xml();
 				dlm_axb_generate_themes_xml();
 			}

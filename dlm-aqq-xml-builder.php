@@ -11,19 +11,19 @@ License: GPLv3
 
 /*
 	Copyright (C) 2015 Krzysztof Grochocki
-	
+
 	This file is part of DLM AQQ XML Builder.
-	
+
 	DLM AQQ XML Builder is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 3, or
 	(at your option) any later version.
-	
+
 	DLM AQQ XML Builder is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	GNU General Public License for more details.
-	
+
 	You should have received a copy of the GNU General Public License
 	along with GNU Radio. If not, see <http://www.gnu.org/licenses/>.
 */
@@ -180,35 +180,44 @@ add_action('add_meta_boxes', 'dlm_axb_adding_meta_boxes');
 //Saving data on post update and rebuild XML
 function dlm_axb_save_post($post_id) {
 	//End on doing an auto save
-	if(defined('DOING_AUTOSAVE')&&DOING_AUTOSAVE) return;
-
-	//End if current user can't edit this post
-	if(!current_user_can('edit_post')) return;
-
+	if(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
 	//Our nonce isn't there or we can't verify it
-	if(!isset($_POST['axb_meta_boxes_nonce'])||!wp_verify_nonce($_POST['axb_meta_boxes_nonce'], 'dlm_axb_meta_boxes_nonce')) {
-		//Rebuild XML on custom post type
+	if(!isset($_POST['axb_meta_boxes_nonce']) || !wp_verify_nonce($_POST['axb_meta_boxes_nonce'], 'dlm_axb_meta_boxes_nonce')) {
+		//Rebuild XML files on custom post type
 		if(get_post_type($post_id)=='dlm_download') {
-			dlm_axb_generate_plugins_xml();
-			dlm_axb_generate_themes_xml();
+			//Get category slug from terms
+			$terms = get_the_terms($post_id, 'dlm_download_category');
+			if($terms && ! is_wp_error($terms)) {
+				$term_slugs_arr = array();
+				foreach ($terms as $term) {
+					$term_slugs_arr[] = $term->slug;
+				}
+				$terms_slug_str = join(" ", $term_slugs_arr);
+			}
+			//Get set categories
+			$plugins_category = get_option('dlm_axb_plugins_category');
+			$themes_category = get_option('dlm_axb_themes_category');
+			//Rebuild XML files only on custom category
+			if((!empty($terms_slug_str)) && (($terms_slug_str==$plugins_category) || ($terms_slug_str==$themes_category))) {
+				dlm_axb_generate_plugins_xml();
+				dlm_axb_generate_themes_xml();
+			}
 		}
 		//End
 		return;
 	}
-
 	//Make sure data is set before trying to save it
-	if(isset( $_POST['dlm_download_changelog']))
+	if(isset($_POST['dlm_download_changelog']))
 		update_post_meta($post_id, 'dlm_download_changelog', $_POST['dlm_download_changelog']);
-	if(isset( $_POST['dlm_download_version_type']))
+	if(isset($_POST['dlm_download_version_type']))
 		update_post_meta($post_id, 'dlm_download_version_type', $_POST['dlm_download_version_type']);
-	if(isset( $_POST['dlm_download_platform']))
+	if(isset($_POST['dlm_download_platform']))
 		update_post_meta($post_id, 'dlm_download_platform', $_POST['dlm_download_platform']);
-	if(isset( $_POST['dlm_download_dll_name']))
+	if(isset($_POST['dlm_download_dll_name']))
 		update_post_meta($post_id, 'dlm_download_dll_name', $_POST['dlm_download_dll_name']);
-	if(isset( $_POST['dlm_download_supported_core']))
+	if(isset($_POST['dlm_download_supported_core']))
 		update_post_meta($post_id, 'dlm_download_supported_core', $_POST['dlm_download_supported_core']);
-
-	//Rebuild XML
+	//Rebuild XML files
 	dlm_axb_generate_plugins_xml();
 	dlm_axb_generate_themes_xml();
 }

@@ -61,11 +61,7 @@ function dlm_axb_settings_page() { ?>
 		<form method="post" action="options.php">
 			<?php //Get saved options
 			$plugins_category = get_option('dlm_axb_plugins_category');
-			$plugins_xml_url = get_option('dlm_axb_plugins_xml_url');
-			if(empty($plugins_xml_url)) $plugins_xml_url = 'aqq_update/plugins.xml';
 			$themes_category = get_option('dlm_axb_themes_category');
-			$themes_xml_url = get_option('dlm_axb_themes_xml_url');
-			if(empty($themes_xml_url)) $themes_xml_url = 'aqq_update/themes.xml';
 			//Generate XML
 			$generate_xml = $_POST['generate_xml'];
 			if(!empty($generate_xml)) {
@@ -106,7 +102,7 @@ function dlm_axb_settings_page() { ?>
 									</li>
 									<li>
 										<label for="dlm_axb_plugins_xml_url">Ściieżka pliku XML:</label>
-										</br><small><?php echo ABSPATH; ?></small><input type="text" name="dlm_axb_plugins_xml_url" id="dlm_axb_plugins_xml_url" value="<?php echo $plugins_xml_url; ?>" />
+										</br><small><?php echo ABSPATH; ?></small><input type="text" name="dlm_axb_plugins_xml_url" id="dlm_axb_plugins_xml_url" value="<?php echo get_option('dlm_axb_plugins_xml_url', 'aqq_update/plugins.xml'); ?>" />
 									</li>
 								</ul>
 							</div>
@@ -130,7 +126,7 @@ function dlm_axb_settings_page() { ?>
 									</li>
 									<li>
 										<label for="dlm_axb_themes_xml_url">Ścieżka pliku XML:</label>
-										</br><small><?php echo ABSPATH; ?></small><input type="text" name="dlm_axb_themes_xml_url" id="dlm_axb_themes_xml_url" value="<?php echo $themes_xml_url; ?>" />
+										</br><small><?php echo ABSPATH; ?></small><input type="text" name="dlm_axb_themes_xml_url" id="dlm_axb_themes_xml_url" value="<?php echo get_option('dlm_axb_themes_xml_url', 'aqq_update/themes.xml'); ?>" />
 									</li>
 								</ul>
 							</div>
@@ -160,11 +156,8 @@ function dlm_axb_adding_meta_boxes() {
 		}
 		$terms_slug_str = join(" ", $term_slugs_arr);
 	}
-	//Get set categories
-	$plugins_category = get_option('dlm_axb_plugins_category');
-	$themes_category = get_option('dlm_axb_themes_category');
 	//Set meta boxes for custom post type and category
-	if((!empty($terms_slug_str))&&(($terms_slug_str==$plugins_category)||($terms_slug_str==$themes_category))) {
+	if((!empty($terms_slug_str)) && (($terms_slug_str==get_option('dlm_axb_plugins_category')) || ($terms_slug_str==get_option('dlm_axb_themes_category')))) {
 		add_meta_box(
 			'dlm_axb_meta_boxes',
 			'Informacje o pliku',
@@ -194,11 +187,8 @@ function dlm_axb_save_post($post_id) {
 				}
 				$terms_slug_str = join(" ", $term_slugs_arr);
 			}
-			//Get set categories
-			$plugins_category = get_option('dlm_axb_plugins_category');
-			$themes_category = get_option('dlm_axb_themes_category');
 			//Rebuild XML files only on custom category
-			if((!empty($terms_slug_str)) && (($terms_slug_str==$plugins_category) || ($terms_slug_str==$themes_category))) {
+			if((!empty($terms_slug_str)) && (($terms_slug_str==get_option('dlm_axb_plugins_category')) || ($terms_slug_str==get_option('dlm_axb_themes_category')))) {
 				dlm_axb_generate_plugins_xml();
 				dlm_axb_generate_themes_xml();
 			}
@@ -354,9 +344,7 @@ function dlm_axb_generate_plugins_xml() {
 	//End query
 	wp_reset_postdata();
 	//Get XML url for plugins
-	$plugins_xml_url = get_option('dlm_axb_plugins_xml_url');
-	if(empty($plugins_xml_url)) $plugins_xml_url = ABSPATH . 'aqq_update/plugins.xml';
-	else $plugins_xml_url = ABSPATH . $plugins_xml_url;
+	$plugins_xml_url = ABSPATH . get_option('dlm_axb_plugins_xml_url', 'aqq_update/plugins.xml');
 	//Save XML to file
 	if($plugins_xml->saveXML($plugins_xml_url)) $success = true;
 	else $success = false;
@@ -416,9 +404,7 @@ function dlm_axb_generate_themes_xml() {
 	//End query
 	wp_reset_postdata();
 	//Get XML url for themes
-	$themes_xml_url = get_option('dlm_axb_themes_xml_url');
-	if(empty($themes_xml_url)) $themes_xml_url = ABSPATH . 'aqq_update/themes.xml';
-	else $themes_xml_url = ABSPATH . $themes_xml_url;
+	$themes_xml_url = ABSPATH . get_option('dlm_axb_themes_xml_url', 'aqq_update/themes.xml');
 	//Save XML to file
 	if($themes_xml->saveXML($themes_xml_url)) $success = true;
 	else $success = false;

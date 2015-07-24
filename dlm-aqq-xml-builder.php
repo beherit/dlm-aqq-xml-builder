@@ -150,7 +150,6 @@ function dlm_axb_settings_page() { ?>
 }
 
 //Adding meta boxes
-add_action('add_meta_boxes', 'dlm_axb_adding_meta_boxes');
 function dlm_axb_adding_meta_boxes() {
 	//Get category slug from terms
 	$terms = get_the_terms($post->ID, 'dlm_download_category');
@@ -176,9 +175,9 @@ function dlm_axb_adding_meta_boxes() {
 		);
 	}
 }
+add_action('add_meta_boxes', 'dlm_axb_adding_meta_boxes');
 
 //Saving data on post update and rebuild XML
-add_action('save_post', 'dlm_axb_save_post');
 function dlm_axb_save_post($post_id) {
 	//End on doing an auto save
 	if(defined('DOING_AUTOSAVE')&&DOING_AUTOSAVE) return;
@@ -213,6 +212,7 @@ function dlm_axb_save_post($post_id) {
 	dlm_axb_generate_plugins_xml();
 	dlm_axb_generate_themes_xml();
 }
+add_action('save_post', 'dlm_axb_save_post');
 
 //Show meta boxes
 function dlm_axb_show_meta_boxes() {

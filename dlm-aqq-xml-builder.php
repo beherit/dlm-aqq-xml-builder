@@ -28,33 +28,31 @@ License: GPLv3
 	along with GNU Radio. If not, see <http://www.gnu.org/licenses/>.
 */
 
-//Define plugin basename
-define('PLUGIN_BASENAME', plugin_basename( __FILE__ ));
-
 //Admin init
-add_action('admin_init', 'dlm_axb_admin_init');
 function dlm_axb_admin_init() {
 	//Register settings
 	register_setting('dlm_axb_settings', 'dlm_axb_plugins_category');
 	register_setting('dlm_axb_settings', 'dlm_axb_plugins_xml_url');
 	register_setting('dlm_axb_settings', 'dlm_axb_themes_category');
 	register_setting('dlm_axb_settings', 'dlm_axb_themes_xml_url');
-	//Add row to plugin page
-	add_filter('plugin_row_meta', 'dlm_axb_plugin_row_meta', 10, 2);
+	//Add link to the settings on plugins page
+	add_filter('plugin_action_links', 'dlm_axb_plugin_action_links', 10, 2);
+}
+add_action('admin_init', 'dlm_axb_admin_init');
+
+//Link to the settings on plugins page
+function dlm_axb_plugin_action_links($action_links, $plugin_file) {
+	if(plugin_basename(__FILE__) == $plugin_file) {
+		$action_links[] = '<a href="edit.php?post_type=dlm_download&page=dlm_axb_settings">Ustawienia</a>';
+	}
+    return $action_links;
 }
 
 //Create admin menu
-add_action('admin_menu', 'dlm_axb_admin_menu');
 function dlm_axb_admin_menu() {
 	add_submenu_page('edit.php?post_type=dlm_download', 'AQQ XML Builder Add-on', 'AQQ XML Builder', 'manage_options', 'dlm_axb_settings', 'dlm_axb_settings_page');
 }
-
-//Settings row on plugin page
-function dlm_axb_plugin_row_meta($plugin_meta, $plugin_file) {
-	if(PLUGIN_BASENAME==$plugin_file)
-        $plugin_meta[] = '<a href="edit.php?post_type=dlm_download&page=dlm_axb_settings">Ustawienia</a>';
-    return $plugin_meta;
-}
+add_action('admin_menu', 'dlm_axb_admin_menu');
 
 //Settings page
 function dlm_axb_settings_page() { ?>

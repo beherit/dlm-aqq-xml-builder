@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: DLM AQQ XML Builder
-Plugin URI: http://beherit.pl/aqq/inne/dlm-aqq-xml-builder
+Plugin URI: http://beherit.pl/pl/aqq/inne/dlm-aqq-xml-builder
 Description: Wspomaga budowanie pliku XML na potrzeby systemu aktualizacji w komunikatorze AQQ.
 Version: 1.0
 Author: Krzysztof Grochocki

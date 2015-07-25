@@ -42,10 +42,10 @@ add_action('admin_init', 'dlm_axb_admin_init');
 
 //Link to the settings on plugins page
 function dlm_axb_plugin_action_links($action_links, $plugin_file) {
-	if(plugin_basename(__FILE__)  ==  $plugin_file) {
+	if(plugin_basename(__FILE__) == $plugin_file) {
 		$action_links[] = '<a href="edit.php?post_type=dlm_download&page=dlm_axb_settings">Ustawienia</a>';
 	}
-    return $action_links;
+	return $action_links;
 }
 
 //Create admin menu
@@ -136,29 +136,29 @@ function dlm_axb_post_meta_box() {
 	</p>
 	<p>
 		<label for="dlm_download_version_type">Typ wersji:</label>
-        <select name="dlm_download_version_type" id="dlm_download_version_type">
-            <option value="0" <?php selected($version_type, 0); ?>>stablina</option>
-            <option value="1" <?php selected($version_type, 1); ?>>rozwojowa</option>
-        </select>
+		<select name="dlm_download_version_type" id="dlm_download_version_type">
+			<option value="0" <?php selected($version_type, 0); ?>>stablina</option>
+			<option value="1" <?php selected($version_type, 1); ?>>rozwojowa</option>
+		</select>
 	</p>
 	<?php if(!in_array($themes_category, $term_slugs)) { ?>
 	<p>
 		<label for="dlm_download_platform">Platforma:</label>
-        <select name="dlm_download_platform" id="dlm_download_platform">
-            <option value="0" <?php selected($platform, 0); ?>>x86</option>
-            <option value="1" <?php selected($platform, 1); ?>>x64</option>
-            <option value="2" <?php selected($platform, 2); ?>>x86/x64</option>
-        </select>
+		<select name="dlm_download_platform" id="dlm_download_platform">
+			<option value="0" <?php selected($platform, 0); ?>>x86</option>
+			<option value="1" <?php selected($platform, 1); ?>>x64</option>
+			<option value="2" <?php selected($platform, 2); ?>>x86/x64</option>
+		</select>
 	</p>
 	<p>
-        <label for="dlm_download_dll_name">Id dodatku:</label>
-        <input type="text" name="dlm_download_dll_name" id="dlm_download_dll_name" value="<?php echo $dll_name; ?>" />
-    </p>
+		<label for="dlm_download_dll_name">Id dodatku:</label>
+		<input type="text" name="dlm_download_dll_name" id="dlm_download_dll_name" value="<?php echo $dll_name; ?>" />
+	</p>
 	<?php } ?>
 	<p>
-        <label for="dlm_download_supported_core">Wymagana wersja AQQ:</label>
-        <input type="text" name="dlm_download_supported_core" id="dlm_download_supported_core" value="<?php echo $supported_core; ?>" />
-    </p>
+		<label for="dlm_download_supported_core">Wymagana wersja AQQ:</label>
+		<input type="text" name="dlm_download_supported_core" id="dlm_download_supported_core" value="<?php echo $supported_core; ?>" />
+	</p>
 	<?php
 }
 
@@ -312,20 +312,20 @@ function dlm_axb_generate_plugins_xml() {
 	$plugins_xml->addAttribute('update', current_time('Y-m-d H:i:s'));
 	//Query items
 	$args = array(
-    	'post_type' => 'dlm_download',
+		'post_type' => 'dlm_download',
 		'post_status' => 'publish',
-		'posts_per_page'  => -1,
+		'posts_per_page' => -1,
 		'tax_query' => array(
 			array(
 				'taxonomy' => 'dlm_download_category',
 				'field' => 'slug',
-				'terms' =>  $category,
+				'terms' => $category,
 				'operator' => 'IN'
 			)
 		),
-    	'orderby' => 'date',
-    	'order' => 'DESC'
-    );
+		'orderby' => 'date',
+		'order' => 'DESC'
+	);
 	$query = new WP_Query($args);
 	//Start query
 	if($query->have_posts()) {
@@ -384,20 +384,20 @@ function dlm_axb_generate_themes_xml() {
 	$themes_xml->addAttribute('update', current_time('Y-m-d H:i:s'));
 	//Query items
 	$args = array(
-    	'post_type' => 'dlm_download',
+		'post_type' => 'dlm_download',
 		'post_status' => 'publish',
-		'posts_per_page'  => -1,
+		'posts_per_page' => -1,
 		'tax_query' => array(
 			array(
 				'taxonomy' => 'dlm_download_category',
 				'field' => 'slug',
-				'terms' =>  $category,
+				'terms' => $category,
 				'operator' => 'IN'
 			)
 		),
-    	'orderby' => 'date',
-    	'order' => 'DESC'
-    );
+		'orderby' => 'date',
+		'order' => 'DESC'
+	);
 	$query = new WP_Query($args);
 	//Start query
 	if($query->have_posts()) {

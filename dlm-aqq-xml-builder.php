@@ -128,7 +128,7 @@ function dlm_axb_post_meta_box() {
 	$supported_core = isset($values['dlm_download_supported_core']) ? $values['dlm_download_supported_core'][0] : '';
 
 	//Set nonce field for saving meta data
-	wp_nonce_field('dlm_axb_meta_boxes_nonce', 'axb_meta_boxes_nonce');
+	wp_nonce_field('dlm_axb_post_meta_box', '_dlm_axb_nonce');
 	//Print meta boxes ?>
 	<p>
 		<label for="dlm_download_changelog">Lista zmian:</label>
@@ -255,7 +255,7 @@ function dlm_axb_save_post($post_id) {
 	//End on doing an auto save
 	if(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
 	//Our nonce isn't there or we can't verify it
-	if(!isset($_POST['axb_meta_boxes_nonce']) || !wp_verify_nonce($_POST['axb_meta_boxes_nonce'], 'dlm_axb_meta_boxes_nonce')) {
+	if(!isset($_POST['_dlm_axb_nonce']) || !wp_verify_nonce($_POST['_dlm_axb_nonce'], 'dlm_axb_post_meta_box')) {
 		//Rebuild XML files on custom post type
 		if(get_post_type($post_id) == 'dlm_download') {
 			//Get category slug from terms

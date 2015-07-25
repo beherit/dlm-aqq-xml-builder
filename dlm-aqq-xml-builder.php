@@ -50,21 +50,26 @@ function dlm_axb_plugin_action_links($action_links, $plugin_file) {
 
 //Create admin menu
 function dlm_axb_admin_menu() {
-	add_submenu_page('edit.php?post_type=dlm_download', 'AQQ XML Builder Add-on', 'AQQ XML Builder', 'manage_options', 'dlm_axb_settings', 'dlm_axb_settings_page');
+	//Global variable
+	global $dlm_axb_options_page_hook;
+	//Add options page
+	$dlm_axb_options_page_hook = add_submenu_page('edit.php?post_type=dlm_download', 'AQQ XML Builder Add-on', 'AQQ XML Builder', 'manage_options', 'dlm_axb_settings', 'dlm_axb_settings_page');
 }
 add_action('admin_menu', 'dlm_axb_admin_menu');
 
-//Add metaboxes
-function dlm_axb_adding_meta_boxes() {
+//Add meta boxes
+function dlm_axb_add_dlm_download_meta_boxes() {
 	//Get category slug from terms
-	$terms = get_the_terms($post->ID, 'dlm_download_category');
+	$terms = get_the_terms($post_id, 'dlm_download_category');
+	$term_slugs = array();
 	if($terms && ! is_wp_error($terms)) {
 		foreach ($terms as $term) {
-			$term_slugs_arr[] = $term->slug;
+			$term_slugs[] = $term->slug;
 		}
 	}
-	//Add post metaboxe for custom post type and category
-	if((in_array(get_option('dlm_axb_plugins_category'), $term_slugs_arr)) || (in_array(get_option('dlm_axb_themes_category'), $term_slugs_arr))) {
+	//Check post category slug
+	if((in_array(get_option('dlm_axb_plugins_category'), $term_slugs)) || (in_array(get_option('dlm_axb_themes_category'), $term_slugs))) {
+		//Add post meta box
 		add_meta_box(
 			'dlm_axb_post_meta_box',
 			'Informacje o pliku',
@@ -75,15 +80,39 @@ function dlm_axb_adding_meta_boxes() {
 		);
 	}
 }
-add_action('add_meta_boxes', 'dlm_axb_adding_meta_boxes');
+add_action('add_meta_boxes_dlm_download', 'dlm_axb_add_dlm_download_meta_boxes');
+function dlm_axb_add_meta_boxes() {
+	//Global variable
+	global $dlm_axb_options_page_hook;
+	//Add plugins meta box
+	add_meta_box(
+		'dlm_axb_plugins_meta_box',
+		'Wtyczki',
+		'dlm_axb_plugins_meta_box',
+		$dlm_axb_options_page_hook,
+		'normal',
+		'default'
+	);
+	//Add themes meta box
+	add_meta_box(
+		'dlm_axb_themes_meta_box',
+		'Kompozycje',
+		'dlm_axb_themes_meta_box',
+		$dlm_axb_options_page_hook,
+		'normal',
+		'default'
+	);
+}
+add_action('add_meta_boxes', 'dlm_axb_add_meta_boxes');
 
-//Show meta boxes
+//Show post meta box
 function dlm_axb_post_meta_box() {
 	//Get category slug from terms
 	$terms = get_the_terms($post->ID, 'dlm_download_category');
+	$term_slugs = array();
 	if($terms && ! is_wp_error($terms)) {
 		foreach ($terms as $term) {
-			$term_slugs_arr[] = $term->slug;
+			$term_slugs[] = $term->slug;
 		}
 	}
 	//Get set categories
@@ -92,7 +121,7 @@ function dlm_axb_post_meta_box() {
 	$values = get_post_custom($post->ID);
 	$changelog = isset($values['dlm_download_changelog']) ? $values['dlm_download_changelog'][0] : '';
 	$version_type = isset($values['dlm_download_version_type']) ? $values['dlm_download_version_type'][0] : 0;
-	if(!in_array($themes_category, $term_slugs_arr)) {
+	if(!in_array($themes_category, $term_slugs)) {
 		$platform = isset($values['dlm_download_platform']) ? $values['dlm_download_platform'][0] : 2;
 		$dll_name = isset($values['dlm_download_dll_name']) ? $values['dlm_download_dll_name'][0] : get_the_title();
 	}
@@ -112,7 +141,7 @@ function dlm_axb_post_meta_box() {
             <option value="1" <?php selected($version_type, 1); ?>>rozwojowa</option>
         </select>
 	</p>
-	<?php if(!in_array($themes_category, $term_slugs_arr)) { ?>
+	<?php if(!in_array($themes_category, $term_slugs)) { ?>
 	<p>
 		<label for="dlm_download_platform">Platforma:</label>
         <select name="dlm_download_platform" id="dlm_download_platform">
@@ -133,93 +162,90 @@ function dlm_axb_post_meta_box() {
 	<?php
 }
 
+//Show plugins meta box
+function dlm_axb_plugins_meta_box() {
+	$plugins_category = get_option('dlm_axb_plugins_category'); ?>
+	<ul>
+		<li>
+			<?php $tax_terms = get_terms('dlm_download_category'); ?>
+			<label for="dlm_axb_plugins_category">Kategoria plików:</label>
+			<select name="dlm_axb_plugins_category" id="dlm_axb_plugins_category">
+				<option value="" <?php selected($plugins_category, ''); ?>></option>
+				<?php foreach ($tax_terms as $tax_term) {
+					echo '<option value="' . $tax_term->slug . '" ' . selected($plugins_category, $tax_term->slug, false) . '>' . $tax_term->name . '</option>';
+				} ?>
+			</select>
+			</br><small>Przy generowaniu pliku XML pod uwagę będą brane jedynie pliki we wskazanej kategorii.</small>
+		</li>
+		<li>
+			<label for="dlm_axb_plugins_xml_url">Ściieżka pliku XML:</label>
+			</br><small><?php echo ABSPATH; ?></small><input type="text" name="dlm_axb_plugins_xml_url" id="dlm_axb_plugins_xml_url" value="<?php echo get_option('dlm_axb_plugins_xml_url', 'aqq_update/plugins.xml'); ?>" />
+		</li>
+	</ul>
+<? }
+
+//Show themes meta box
+function dlm_axb_themes_meta_box() {
+	$themes_category = get_option('dlm_axb_themes_category'); ?>
+	<ul>
+		<li>
+			<?php $tax_terms = get_terms('dlm_download_category'); ?>
+			<label for="dlm_axb_themes_category">Kategoria plików:</label>
+			<select name="dlm_axb_themes_category" id="dlm_axb_themes_category">
+				<option value="" <?php selected($themes_category, ''); ?>></option>
+				<?php foreach ($tax_terms as $tax_term) {
+					echo '<option value="' . $tax_term->slug . '" ' . selected($themes_category, $tax_term->slug, false) . '>' . $tax_term->name . '</option>';
+				} ?>
+			</select>
+			</br><small>Przy generowaniu pliku XML pod uwagę będą brane jedynie pliki we wskazanej kategorii.</small>
+		</li>
+		<li>
+			<label for="dlm_axb_themes_xml_url">Ścieżka pliku XML:</label>
+			</br><small><?php echo ABSPATH; ?></small><input type="text" name="dlm_axb_themes_xml_url" id="dlm_axb_themes_xml_url" value="<?php echo get_option('dlm_axb_themes_xml_url', 'aqq_update/themes.xml'); ?>" />
+		</li>
+	</ul>
+<?php }
+
 //Display settings page
-function dlm_axb_settings_page() { ?>
+function dlm_axb_settings_page() {
+	//Global variable
+	global $dlm_axb_options_page_hook;
+	//Enable add_meta_boxes function
+	do_action('add_meta_boxes', $dlm_axb_options_page_hook); ?>
 	<div class="wrap">
 		<h2>AQQ XML Builder Add-on</h2>
-		<form method="post" action="options.php">
-			<?php //Get saved options
+		<?php //Generate XML
+		if(isset($_POST['generate_xml'])) {
+			//Get saved options
 			$plugins_category = get_option('dlm_axb_plugins_category');
 			$themes_category = get_option('dlm_axb_themes_category');
-			//Generate XML
-			$generate_xml = $_POST['generate_xml'];
-			if(!empty($generate_xml)) {
-				//Generate XML for plugins files
-				if(!empty($plugins_category)) {
-					if(dlm_axb_generate_plugins_xml())
-						echo '<div class="updated" id="message"><p><strong>Plik XML dla wtyczek został pomyślnie wygenerowany.</strong></p></div>';
-					else
-						echo '<div class="error" id="message"><p><strong>Wystąpiły problemy przy zapisie pliku XML dla wtyczek. Sprawdź ustawienia wtyczki.</strong></p></div>';
-				}
-				//Generate XML for themes files
-				if(!empty($themes_category)) {
-					if(dlm_axb_generate_themes_xml())
-						echo '<div class="updated" id="message"><p><strong>Plik XML dla kompozycji został pomyślnie wygenerowany.</strong></p></div>';
-					else
-						echo '<div class="error" id="message"><p><strong>Wystąpiły problemy przy zapisie pliku XML dla kompozycji. Sprawdź ustawienia wtyczki.</strong></p></div>';
-				}
+			//Generate XML for plugins files
+			if(!empty($plugins_category)) {
+				if(dlm_axb_generate_plugins_xml())
+					echo '<div id="setting-error-settings_updated" class="updated settings-error notice is-dismissible"><p><strong>Plik XML dla wtyczek został pomyślnie wygenerowany.</strong></p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Ukryj ten komunikat.</span></button></div>';
+				else
+					echo '<div class="error settings-error notice is-dismissible" id="setting-error-settings_updated"><p><strong>Wystąpiły problemy przy zapisie pliku XML dla wtyczek. Sprawdź ustawienia wtyczki.</strong></p></div>';
 			}
-			//Output settings nonce
-			settings_fields('dlm_axb_settings'); ?>
-			<div id="poststuff" class="metabox-holder">
-				<div class="has-sidebar-content" id="post-body-content">
-					<div class="meta-box-sortabless">
-						<div class="postbox">
-							<h3 class="hndle"><span>Wtyczki</span></h3>
-							<div class="inside">
-								<ul>
-									<li>
-										<?php $tax_terms = get_terms('dlm_download_category'); ?>
-										<label for="dlm_axb_plugins_category">Kategoria plików:</label>
-										<select name="dlm_axb_plugins_category" id="dlm_axb_plugins_category">
-											<option value="" <?php selected($plugins_category, ''); ?>></option>
-											<?php foreach ($tax_terms as $tax_term) {
-												echo '<option value="' . $tax_term->slug . '" ' . selected($plugins_category, $tax_term->slug, false) . '>' . $tax_term->name . '</option>';
-											} ?>
-										</select>
-										</br><small>Przy generowaniu pliku XML pod uwagę będą brane jedynie pliki we wskazanej kategorii.</small>
-									</li>
-									<li>
-										<label for="dlm_axb_plugins_xml_url">Ściieżka pliku XML:</label>
-										</br><small><?php echo ABSPATH; ?></small><input type="text" name="dlm_axb_plugins_xml_url" id="dlm_axb_plugins_xml_url" value="<?php echo get_option('dlm_axb_plugins_xml_url', 'aqq_update/plugins.xml'); ?>" />
-									</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-					<div class="meta-box-sortabless">
-						<div class="postbox">
-							<h3 class="hndle"><span>Kompozycje</span></h3>
-							<div class="inside">
-								<ul>
-									<li>
-										<?php $tax_terms = get_terms('dlm_download_category'); ?>
-										<label for="dlm_axb_themes_category">Kategoria plików:</label>
-										<select name="dlm_axb_themes_category" id="dlm_axb_themes_category">
-											<option value="" <?php selected($themes_category, ''); ?>></option>
-											<?php foreach ($tax_terms as $tax_term) {
-												echo '<option value="' . $tax_term->slug . '" ' . selected($themes_category, $tax_term->slug, false) . '>' . $tax_term->name . '</option>';
-											} ?>
-										</select>
-										</br><small>Przy generowaniu pliku XML pod uwagę będą brane jedynie pliki we wskazanej kategorii.</small>
-									</li>
-									<li>
-										<label for="dlm_axb_themes_xml_url">Ścieżka pliku XML:</label>
-										</br><small><?php echo ABSPATH; ?></small><input type="text" name="dlm_axb_themes_xml_url" id="dlm_axb_themes_xml_url" value="<?php echo get_option('dlm_axb_themes_xml_url', 'aqq_update/themes.xml'); ?>" />
-									</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div>
-					<p class="submit">
-						<input type="submit" name="submit" id="submit" class="button-primary" value="Zapisz zmiany" />
-						<button type="submit" name="generate_xml" id="generate_xml" class="button-secondary" formaction="?post_type=dlm_download&page=dlm_axb_settings" value="generate_xml">Generuj pliki XML</button>
-					</p>
+			//Generate XML for themes files
+			if(!empty($themes_category)) {
+				if(dlm_axb_generate_themes_xml())
+					echo '<div id="setting-error-settings_updated" class="updated settings-error notice is-dismissible"><p><strong>Plik XML dla kompozycji został pomyślnie wygenerowany.</strong></p></div>';
+				else
+					echo '<div class="error settings-error notice is-dismissible" id="setting-error-settings_updated"><p><strong>Wystąpiły problemy przy zapisie pliku XML dla kompozycji. Sprawdź ustawienia wtyczki.</strong></p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Ukryj ten komunikat.</span></button></div>';
+			}
+		} ?>
+		<div id="poststuff">
+			<div id="post-body" class="metabox-holder">
+				<div id="postbox-container" class="postbox-container">
+					<form id="dlm_axb-form" method="post" action="options.php">
+						<?php settings_fields('dlm_axb_settings');
+						do_meta_boxes($dlm_axb_options_page_hook, 'normal', null); ?>
+						<input id="submit" class="button button-primary" type="submit" name="submit" value="Zapisz zmiany" />
+						<input id="generate_xml" class="button button-secondary" type="submit" formaction="?post_type=dlm_download&page=dlm_axb_settings" name="generate_xml" value="Generuj pliki XML" />
+					</form>
 				</div>
 			</div>
-		</form>
+		</div>
 	</div>
 	<?php
 }
@@ -234,13 +260,14 @@ function dlm_axb_save_post($post_id) {
 		if(get_post_type($post_id) == 'dlm_download') {
 			//Get category slug from terms
 			$terms = get_the_terms($post_id, 'dlm_download_category');
+			$term_slugs = array();
 			if($terms && ! is_wp_error($terms)) {
 				foreach ($terms as $term) {
-					$term_slugs_arr[] = $term->slug;
+					$term_slugs[] = $term->slug;
 				}
 			}
-			//Add post metaboxe for custom post type and category
-			if((in_array(get_option('dlm_axb_plugins_category'), $term_slugs_arr)) || (in_array(get_option('dlm_axb_themes_category'), $term_slugs_arr))) {
+			//Add post meta boxe for custom post type and category
+			if((in_array(get_option('dlm_axb_plugins_category'), $term_slugs)) || (in_array(get_option('dlm_axb_themes_category'), $term_slugs))) {
 				dlm_axb_generate_plugins_xml();
 				dlm_axb_generate_themes_xml();
 			}

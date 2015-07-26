@@ -1,11 +1,13 @@
 <?php
 /*
 Plugin Name: DLM AQQ XML Builder
-Plugin URI: http://beherit.pl/pl/aqq/inne/dlm-aqq-xml-builder
-Description: Wspomaga budowanie pliku XML na potrzeby systemu aktualizacji w komunikatorze AQQ.
+Plugin URI: http://beherit.pl/en/aqq/other/dlm-aqq-xml-builder
+Description: Helps to build an XML files for update system in AQQ IM.
 Version: 1.0
 Author: Krzysztof Grochocki
 Author URI: http://beherit.pl/
+Text Domain: dlm_axb
+Domain Path: /languages
 License: GPLv3
 */
 
@@ -28,6 +30,16 @@ License: GPLv3
 	along with GNU Radio. If not, see <http://www.gnu.org/licenses/>.
 */
 
+//Translate plugin metadata
+__('http://beherit.pl/en/aqq/other/dlm-aqq-xml-builder', 'dlm_axb');
+__('Helps to build an XML files for update system in AQQ IM.', 'dlm_axb');
+
+//Define translations
+function ejabat_textdomain() {
+	load_plugin_textdomain('dlm_axb', false, dirname(plugin_basename(__FILE__)).'/languages');
+}
+add_action('init', 'ejabat_textdomain');
+
 //Admin init
 function dlm_axb_admin_init() {
 	//Register settings
@@ -43,7 +55,7 @@ add_action('admin_init', 'dlm_axb_admin_init');
 //Link to the settings on plugins page
 function dlm_axb_plugin_action_links($action_links, $plugin_file) {
 	if(plugin_basename(__FILE__) == $plugin_file) {
-		$action_links[] = '<a href="edit.php?post_type=dlm_download&page=dlm_axb_settings">Ustawienia</a>';
+		$action_links[] = '<a href="edit.php?post_type=dlm_download&page=dlm_axb_settings">'.__('Settings', 'dlm_axb').'</a>';
 	}
 	return $action_links;
 }
@@ -72,7 +84,7 @@ function dlm_axb_add_dlm_download_meta_boxes() {
 		//Add post meta box
 		add_meta_box(
 			'dlm_axb_post_meta_box',
-			'Informacje o pliku',
+			__('File information', 'dlm_axb'),
 			'dlm_axb_post_meta_box',
 			'dlm_download',
 			'normal',
@@ -87,7 +99,7 @@ function dlm_axb_add_meta_boxes() {
 	//Add plugins meta box
 	add_meta_box(
 		'dlm_axb_plugins_meta_box',
-		'Wtyczki',
+		__('Plugins', 'dlm_axb'),
 		'dlm_axb_plugins_meta_box',
 		$dlm_axb_options_page_hook,
 		'normal',
@@ -96,7 +108,7 @@ function dlm_axb_add_meta_boxes() {
 	//Add themes meta box
 	add_meta_box(
 		'dlm_axb_themes_meta_box',
-		'Kompozycje',
+		__('Themes', 'dlm_axb'),
 		'dlm_axb_themes_meta_box',
 		$dlm_axb_options_page_hook,
 		'normal',
@@ -131,19 +143,19 @@ function dlm_axb_post_meta_box() {
 	wp_nonce_field('dlm_axb_post_meta_box', '_dlm_axb_nonce');
 	//Print meta boxes ?>
 	<p>
-		<label for="dlm_download_changelog">Lista zmian:</label>
+		<label for="dlm_download_changelog"><?php _e('Changelog', 'dlm_axb'); ?>:</label>
 		<textarea name="dlm_download_changelog" id="dlm_download_changelog" style="width:100%; min-height:200px;"><?php echo $changelog; ?></textarea>
 	</p>
 	<p>
-		<label for="dlm_download_version_type">Typ wersji:</label>
+		<label for="dlm_download_version_type"><?php _e('Version type', 'dlm_axb'); ?>:</label>
 		<select name="dlm_download_version_type" id="dlm_download_version_type">
-			<option value="0" <?php selected($version_type, 0); ?>>stablina</option>
-			<option value="1" <?php selected($version_type, 1); ?>>rozwojowa</option>
+			<option value="0" <?php selected($version_type, 0); ?>><?php _e('stable', 'dlm_axb'); ?></option>
+			<option value="1" <?php selected($version_type, 1); ?>><?php _e('beta', 'dlm_axb'); ?></option>
 		</select>
 	</p>
 	<?php if(!in_array($themes_category, $term_slugs)) { ?>
 	<p>
-		<label for="dlm_download_platform">Platforma:</label>
+		<label for="dlm_download_platform"><?php _e('Platform', 'dlm_axb'); ?>:</label>
 		<select name="dlm_download_platform" id="dlm_download_platform">
 			<option value="0" <?php selected($platform, 0); ?>>x86</option>
 			<option value="1" <?php selected($platform, 1); ?>>x64</option>
@@ -151,12 +163,12 @@ function dlm_axb_post_meta_box() {
 		</select>
 	</p>
 	<p>
-		<label for="dlm_download_dll_name">Id dodatku:</label>
+		<label for="dlm_download_dll_name"><?php _e('Addon ID', 'dlm_axb'); ?>:</label>
 		<input type="text" name="dlm_download_dll_name" id="dlm_download_dll_name" value="<?php echo $dll_name; ?>" />
 	</p>
 	<?php } ?>
 	<p>
-		<label for="dlm_download_supported_core">Wymagana wersja AQQ:</label>
+		<label for="dlm_download_supported_core"><?php _e('Required AQQ version', 'dlm_axb'); ?>:</label>
 		<input type="text" name="dlm_download_supported_core" id="dlm_download_supported_core" value="<?php echo $supported_core; ?>" />
 	</p>
 	<?php
@@ -168,17 +180,17 @@ function dlm_axb_plugins_meta_box() {
 	<ul>
 		<li>
 			<?php $tax_terms = get_terms('dlm_download_category'); ?>
-			<label for="dlm_axb_plugins_category">Kategoria plików:</label>
+			<label for="dlm_axb_plugins_category"><?php _e('Files category', 'dlm_axb'); ?>:</label>
 			<select name="dlm_axb_plugins_category" id="dlm_axb_plugins_category">
 				<option value="" <?php selected($plugins_category, ''); ?>></option>
 				<?php foreach ($tax_terms as $tax_term) {
 					echo '<option value="' . $tax_term->slug . '" ' . selected($plugins_category, $tax_term->slug, false) . '>' . $tax_term->name . '</option>';
 				} ?>
 			</select>
-			</br><small>Przy generowaniu pliku XML pod uwagę będą brane jedynie pliki we wskazanej kategorii.</small>
+			</br><small><?php _e('When generating the XML file will only be included files in the specified category.', 'dlm_axb'); ?></small>
 		</li>
 		<li>
-			<label for="dlm_axb_plugins_xml_url">Ściieżka pliku XML:</label>
+			<label for="dlm_axb_plugins_xml_url"><?php _e('XML file path', 'dlm_axb')?>:</label>
 			</br><small><?php echo ABSPATH; ?></small><input type="text" name="dlm_axb_plugins_xml_url" id="dlm_axb_plugins_xml_url" value="<?php echo get_option('dlm_axb_plugins_xml_url', 'aqq_update/plugins.xml'); ?>" />
 		</li>
 	</ul>
@@ -190,17 +202,17 @@ function dlm_axb_themes_meta_box() {
 	<ul>
 		<li>
 			<?php $tax_terms = get_terms('dlm_download_category'); ?>
-			<label for="dlm_axb_themes_category">Kategoria plików:</label>
+			<label for="dlm_axb_themes_category"><?php _e('Files category', 'dlm_axb'); ?>:</label>
 			<select name="dlm_axb_themes_category" id="dlm_axb_themes_category">
 				<option value="" <?php selected($themes_category, ''); ?>></option>
 				<?php foreach ($tax_terms as $tax_term) {
 					echo '<option value="' . $tax_term->slug . '" ' . selected($themes_category, $tax_term->slug, false) . '>' . $tax_term->name . '</option>';
 				} ?>
 			</select>
-			</br><small>Przy generowaniu pliku XML pod uwagę będą brane jedynie pliki we wskazanej kategorii.</small>
+			</br><small><?php _e('When generating the XML file will only be included files in the specified category.', 'dlm_axb'); ?></small>
 		</li>
 		<li>
-			<label for="dlm_axb_themes_xml_url">Ścieżka pliku XML:</label>
+			<label for="dlm_axb_themes_xml_url"><?php _e('XML file path', 'dlm_axb')?>:</label>
 			</br><small><?php echo ABSPATH; ?></small><input type="text" name="dlm_axb_themes_xml_url" id="dlm_axb_themes_xml_url" value="<?php echo get_option('dlm_axb_themes_xml_url', 'aqq_update/themes.xml'); ?>" />
 		</li>
 	</ul>
@@ -222,16 +234,16 @@ function dlm_axb_settings_page() {
 			//Generate XML for plugins files
 			if(!empty($plugins_category)) {
 				if(dlm_axb_generate_plugins_xml())
-					echo '<div id="setting-error-settings_updated" class="updated settings-error notice is-dismissible"><p><strong>Plik XML dla wtyczek został pomyślnie wygenerowany.</strong></p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Ukryj ten komunikat.</span></button></div>';
+					echo '<div id="setting-error-settings_updated" class="updated settings-error notice is-dismissible"><p><strong>'.__('The XML file for the plugins has been successfully generated.', 'dlm_axb').'</strong></p></div>';
 				else
-					echo '<div class="error settings-error notice is-dismissible" id="setting-error-settings_updated"><p><strong>Wystąpiły problemy przy zapisie pliku XML dla wtyczek. Sprawdź ustawienia wtyczki.</strong></p></div>';
+					echo '<div class="error settings-error notice is-dismissible" id="setting-error-settings_updated"><p><strong>'.__('Errors occurred while saving XML file for plugins. Check the plugin settings.', 'dlm_axb').'Wystąpiły problemy przy zapisie pliku XML dla wtyczek. Sprawdź ustawienia wtyczki.</strong></p></div>';
 			}
 			//Generate XML for themes files
 			if(!empty($themes_category)) {
 				if(dlm_axb_generate_themes_xml())
-					echo '<div id="setting-error-settings_updated" class="updated settings-error notice is-dismissible"><p><strong>Plik XML dla kompozycji został pomyślnie wygenerowany.</strong></p></div>';
+					echo '<div id="setting-error-settings_updated" class="updated settings-error notice is-dismissible"><p><strong>'.__('The XML file for the themes has been successfully generated.', 'dlm_axb').'</strong></p></div>';
 				else
-					echo '<div class="error settings-error notice is-dismissible" id="setting-error-settings_updated"><p><strong>Wystąpiły problemy przy zapisie pliku XML dla kompozycji. Sprawdź ustawienia wtyczki.</strong></p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Ukryj ten komunikat.</span></button></div>';
+					echo '<div class="error settings-error notice is-dismissible" id="setting-error-settings_updated"><p><strong>'.__('Errors occurred while saving XML file for themes. Check the plugin settings.', 'dlm_axb').'Wystąpiły problemy przy zapisie pliku XML dla kompozycji. Sprawdź ustawienia wtyczki.</strong></p></div>';
 			}
 		} ?>
 		<div id="poststuff">
@@ -240,8 +252,8 @@ function dlm_axb_settings_page() {
 					<form id="dlm_axb-form" method="post" action="options.php">
 						<?php settings_fields('dlm_axb_settings');
 						do_meta_boxes($dlm_axb_options_page_hook, 'normal', null); ?>
-						<input id="submit" class="button button-primary" type="submit" name="submit" value="Zapisz zmiany" />
-						<input id="generate_xml" class="button button-secondary" type="submit" formaction="?post_type=dlm_download&page=dlm_axb_settings" name="generate_xml" value="Generuj pliki XML" />
+						<input id="submit" class="button button-primary" type="submit" name="submit" value="<?php _e('Save changes', 'dlm_axb')?>" />
+						<input id="generate_xml" class="button button-secondary" type="submit" formaction="?post_type=dlm_download&page=dlm_axb_settings" name="generate_xml" value="<?php _e('Generate XML files', 'dlm_axb')?>" />
 					</form>
 				</div>
 			</div>

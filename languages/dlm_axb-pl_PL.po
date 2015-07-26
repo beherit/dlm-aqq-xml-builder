@@ -1,0 +1,120 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: DLM AQQ XML Builder\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-07-26 09:47+0200\n"
+"PO-Revision-Date: 2015-07-26 09:47+0200\n"
+"Last-Translator: Krzysztof Grochocki <kontakt@beherit.pl>\n"
+"Language-Team: \n"
+"Language: pl_PL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
+"_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
+"X-Poedit-Basepath: ..\n"
+"X-Textdomain-Support: yes\n"
+"X-Generator: Poedit 1.8.3\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: dlm-aqq-xml-builder.php:34
+msgid "http://beherit.pl/en/aqq/other/dlm-aqq-xml-builder"
+msgstr "http://beherit.pl/pl/aqq/inne/dlm-aqq-xml-builder"
+
+#: dlm-aqq-xml-builder.php:35
+msgid "Helps to build an XML files for update system in AQQ IM."
+msgstr ""
+"Wspomaga budowanie pliku XML na potrzeby systemu aktualizacji w "
+"komunikatorze AQQ."
+
+#: dlm-aqq-xml-builder.php:58
+msgid "Settings"
+msgstr "Ustawienia"
+
+#: dlm-aqq-xml-builder.php:87
+msgid "File information"
+msgstr "Informacje o pliku"
+
+#: dlm-aqq-xml-builder.php:102
+msgid "Plugins"
+msgstr "Wtyczki"
+
+#: dlm-aqq-xml-builder.php:111
+msgid "Themes"
+msgstr "Kompozycje"
+
+#: dlm-aqq-xml-builder.php:146
+msgid "Changelog"
+msgstr "Lista zmian"
+
+#: dlm-aqq-xml-builder.php:150
+msgid "Version type"
+msgstr "Typ wersji"
+
+#: dlm-aqq-xml-builder.php:152
+msgid "stable"
+msgstr "stabilna"
+
+#: dlm-aqq-xml-builder.php:153
+msgid "beta"
+msgstr "beta"
+
+#: dlm-aqq-xml-builder.php:158
+msgid "Platform"
+msgstr "Platforma"
+
+#: dlm-aqq-xml-builder.php:166
+msgid "Addon ID"
+msgstr "ID dodatku"
+
+#: dlm-aqq-xml-builder.php:171
+msgid "Required AQQ version"
+msgstr "Wymagana wersja AQQ"
+
+#: dlm-aqq-xml-builder.php:183 dlm-aqq-xml-builder.php:205
+msgid "Files category"
+msgstr "Kategoria plików"
+
+#: dlm-aqq-xml-builder.php:190 dlm-aqq-xml-builder.php:212
+msgid ""
+"When generating the XML file will only be included files in the specified "
+"category."
+msgstr ""
+"Przy generowaniu pliku XML uwzględnione będą jedynie pliki we wskazanej "
+"kategorii."
+
+#: dlm-aqq-xml-builder.php:193 dlm-aqq-xml-builder.php:215
+msgid "XML file path"
+msgstr "Ścieżka pliku XML"
+
+#: dlm-aqq-xml-builder.php:237
+msgid "The XML file for the plugins has been successfully generated."
+msgstr "Plik XML dla wtyczek został pomyślnie wygenerowany."
+
+#: dlm-aqq-xml-builder.php:239
+msgid ""
+"Errors occurred while saving XML file for plugins. Check the plugin settings."
+msgstr ""
+"Wystąpiły błędy podczas zapisywania pliku XML dla wtyczek. Sprawdź "
+"ustawienia wtyczki."
+
+#: dlm-aqq-xml-builder.php:244
+msgid "The XML file for the themes has been successfully generated."
+msgstr "Plik XML dla kompozycji został pomyślnie wygenerowany."
+
+#: dlm-aqq-xml-builder.php:246
+msgid ""
+"Errors occurred while saving XML file for themes. Check the plugin settings."
+msgstr ""
+"Wystąpiły błędy podczas zapisywania pliku XML dla kompozycji. Sprawdź "
+"ustawienia wtyczki."
+
+#: dlm-aqq-xml-builder.php:255
+msgid "Save changes"
+msgstr "Zapisz zmiany"
+
+#: dlm-aqq-xml-builder.php:256
+msgid "Generate XML files"
+msgstr "Generuj pliki XML"
